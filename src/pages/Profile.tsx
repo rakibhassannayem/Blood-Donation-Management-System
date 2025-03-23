@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import toast from "react-hot-toast";
@@ -21,7 +20,6 @@ interface Profile {
 
 export default function Profile() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -124,7 +122,16 @@ export default function Profile() {
           </div>
 
           <form onSubmit={handleSubmitWithLoading} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="Email"
+              type="email"
+              value={user?.email || ''}
+              disabled
+              icon={<Mail className="h-5 w-5 text-gray-400" />}
+              className="bg-gray-50"
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <Input
                 label="Name"
                 type="text"

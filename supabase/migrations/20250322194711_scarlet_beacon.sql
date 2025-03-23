@@ -35,6 +35,7 @@ CREATE TABLE profiles (
   user_id uuid REFERENCES auth.users NOT NULL,
   type text NOT NULL CHECK (type IN ('donor', 'hospital')),
   name text NOT NULL,
+  email text,
   contact text,
   address text,
   blood_type text CHECK (type != 'hospital' OR blood_type IS NULL),
@@ -107,6 +108,18 @@ CREATE POLICY "Hospitals can update their own requests"
     )
   )
   WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE user_id = auth.uid()
+      AND type = 'hospital'
+      AND id = blood_requests.hospital_id
+    )
+  );
+
+CREATE POLICY "Hospitals can delete their own requests"
+  ON blood_requests FOR DELETE
+  TO authenticated
+  USING (
     EXISTS (
       SELECT 1 FROM profiles
       WHERE user_id = auth.uid()

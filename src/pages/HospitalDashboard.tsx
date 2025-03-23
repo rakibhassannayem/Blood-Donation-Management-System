@@ -12,6 +12,7 @@ import {
   FileText,
   AlertTriangle,
   Clock,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
@@ -48,7 +49,7 @@ export default function HospitalDashboard() {
   const [bloodTypeFilter, setBloodTypeFilter] = useState("all");
   const [formData, setFormData] = useState({
     blood_type: "",
-    units_needed: '',
+    units_needed: "",
     urgency_level: "",
     description: "",
   });
@@ -86,6 +87,60 @@ export default function HospitalDashboard() {
 
     if (!error && data) {
       setDonors(data);
+    }
+  };
+
+  const handleDelete = async (requestId: string) => {
+    const confirmed = window.confirm("Are you sure you want to delete this request?");
+    if (!confirmed) return;
+
+    try {
+      // Get profile ID first
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user?.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error("Profile error:", profileError);
+        toast.error("Could not verify hospital profile");
+        return;
+      }
+
+      // First verify the request exists
+      const { data: request, error: requestError } = await supabase
+        .from("blood_requests")
+        .select("*")
+        .eq("id", requestId)
+        .single();
+
+      if (requestError || !request) {
+        console.error("Request verification error:", requestError);
+        toast.error("Could not verify request exists");
+        return;
+      }
+
+      console.log("Attempting to delete request:", requestId);
+      console.log("Associated with hospital:", profile.id);
+
+      // Delete the request
+      const { error: deleteError } = await supabase
+        .from("blood_requests")
+        .delete()
+        .eq("id", requestId)
+        .eq("hospital_id", profile.id);
+
+      if (deleteError) {
+        console.error("Delete error:", deleteError);
+        toast.error(`Failed to delete request: ${deleteError.message}`);
+      } else {
+        setRequests(requests.filter(request => request.id !== requestId));
+        toast.success("Request deleted successfully");
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("An error occurred while deleting the request");
     }
   };
 
@@ -337,14 +392,23 @@ export default function HospitalDashboard() {
                         </div>
                       )}
                       <div className="mt-4 pt-4 border-t border-gray-100">
-                        <div className="text-sm flex items-center">
-                          <Clock className="h-4 w-4 mr-1 text-gray-400" />
-                          <span className="font-medium text-gray-500">
-                            Posted{" "}
-                          </span>
-                          <span className="ml-1 text-gray-900">
-                            {new Date(request.created_at).toLocaleDateString()}
-                          </span>
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm flex items-center">
+                            <Clock className="h-4 w-4 mr-1 text-gray-400" />
+                            <span className="font-medium text-gray-500">
+                              Posted{" "}
+                            </span>
+                            <span className="ml-1 text-gray-900">
+                              {new Date(request.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handleDelete(request.id)}
+                            className="text-red-600 hover:text-red-700 transition-colors duration-200"
+                            title="Delete request"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
                         </div>
                       </div>
                     </Card>
@@ -376,7 +440,7 @@ export default function HospitalDashboard() {
                         Blood Type
                       </label>
                       <select
-                      
+                        required
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
                         value={formData.blood_type}
                         onChange={(e) =>
@@ -386,6 +450,7 @@ export default function HospitalDashboard() {
                           })
                         }
                       >
+                        <option value="">Select Blood Type</option>
                         {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(
                           (type) => (
                             <option key={type} value={type}>
@@ -410,7 +475,7 @@ export default function HospitalDashboard() {
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            units_needed: parseInt(e.target.value),
+                            units_needed: e.target.value,
                           })
                         }
                       />
@@ -421,6 +486,7 @@ export default function HospitalDashboard() {
                         Urgency Level
                       </label>
                       <select
+                        required
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
                         value={formData.urgency_level}
                         onChange={(e) =>
@@ -430,7 +496,8 @@ export default function HospitalDashboard() {
                           })
                         }
                       >
-                        {["select","low", "medium", "high", "critical"].map((level) => (
+                        <option value="">Select Urgency Level</option>
+                        {["low", "medium", "high", "critical"].map((level) => (
                           <option key={level} value={level}>
                             {level.charAt(0).toUpperCase() + level.slice(1)}
                           </option>

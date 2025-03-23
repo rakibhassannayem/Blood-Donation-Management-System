@@ -11,8 +11,20 @@ import LandingPage from "./pages/LandingPage";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 const ProtectedRoute = ({ children, userType = "donor" }: { children: React.ReactNode, userType?: "donor" | "hospital" }) => {
-  const { session } = useAuth();
-  if (!session) return <Navigate to={userType === "donor" ? "/donor/login" : "/hospital/login"} />;
+  const { session, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Navigate to={userType === "donor" ? "/donor/login" : "/hospital/login"} />;
+  }
+
   return <>{children}</>;
 };
 
