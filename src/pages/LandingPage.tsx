@@ -68,7 +68,7 @@ export default function LandingPage() {
     {
       icon: <Hospital className="h-6 w-6 text-red-500" />,
       value: requestCount,
-      label: "Partner Hospitals",
+      label: "Donation Request",
     }
   ];
 

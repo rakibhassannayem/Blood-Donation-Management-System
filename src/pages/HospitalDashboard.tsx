@@ -27,7 +27,6 @@ interface BloodRequest {
   blood_type: string;
   units_needed: number;
   urgency_level: string;
-  status: string;
   description: string;
   created_at: string;
 }
@@ -365,20 +364,6 @@ export default function HospitalDashboard() {
                         >
                           {request.urgency_level.charAt(0).toUpperCase() +
                             request.urgency_level.slice(1)}
-                        </Badge>
-                      </div>
-                      <div className="mb-4">
-                        <span className="text-sm font-medium text-gray-500 flex items-center">
-                          <Clock className="h-4 w-4 mr-1 text-gray-400" />
-                          Status
-                        </span>
-                        <Badge
-                          variant={
-                            request.status === "active" ? "success" : "default"
-                          }
-                        >
-                          {request.status.charAt(0).toUpperCase() +
-                            request.status.slice(1)}
                         </Badge>
                       </div>
                       {request.description && (
