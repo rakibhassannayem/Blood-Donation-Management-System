@@ -61,12 +61,12 @@ export default function LandingPage() {
       label: "Registered Donors",
     },
     {
-      icon: <Activity className="h-6 w-6 text-red-500" />,
+      icon: <Hospital className="h-6 w-6 text-red-500" />,
       value: hospitalCount,
       label: "Partner Hospitals",
     },
     {
-      icon: <Hospital className="h-6 w-6 text-red-500" />,
+      icon: <Activity className="h-6 w-6 text-red-500" />,
       value: requestCount,
       label: "Donation Request",
     }

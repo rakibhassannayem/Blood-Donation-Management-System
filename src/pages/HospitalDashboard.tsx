@@ -163,6 +163,13 @@ export default function HospitalDashboard() {
         toast.error("Failed to create request");
       } else {
         toast.success("Blood request created successfully");
+        // Reset form data
+        setFormData({
+          blood_type: "",
+          units_needed: "",
+          urgency_level: "",
+          description: "",
+        });
         setShowModal(false);
         fetchRequests();
       }
